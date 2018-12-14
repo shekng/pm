@@ -49,14 +49,16 @@ function ($, Mn, pm, pmSyncChild, ifrView) {
         onStart: function() {
             this.showView(new ifrView());
             
-            pmSyncChild.getItem({
+            this.storeDB = {};
+            this.oSync = pmSyncChild(this.storeDB);
+            
+            this.oSync.getItem({
                 item: "item1", 
                 callBack: function(oData) {
-                    debugger
                 }
             });
             
-            pmSyncChild.setItem({
+            this.oSync.setItem({
                 item: "item1", 
                 data: "def"
             });

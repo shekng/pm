@@ -102,6 +102,8 @@ window.users = colUser;
             return "err-102";
         },
         onStart: function() {
+            var me = this;
+            
             this.showView(new AppView());
             this.router = new AppRouter({"app": this});
             Backbone.history.start();
@@ -119,27 +121,16 @@ window.users = colUser;
             this.storeDB = {
                 item1: "abc"
             }
-            pmSyncParent(this);
             
-            /*
-            pmSync.listen({
-                to: "child", 
-                callBack: function(data){
-                    debugger
-                    return "Ooooop";
-                }
-            });
-                        
-            setTimeout(function(){
-                pmSync.trigger({
-                    from: "parent",
-                    data: "Yooo",
-                    callBack: function(oReturn) {
-                        debugger
-                    }
-                });
-            }, 1000);            
-            */
+            this.oSync = pmSyncParent(this.storeDB);
+            
+            setTimeout(function() {
+                me.oSync.setItemtoChild({
+                    item: "item2", 
+                    data: "Oop"
+                });    
+            }, 2000);
+            
         }
     });
     

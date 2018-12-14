@@ -2,20 +2,31 @@
 
 define("pmSyncParent", ['jquery', 'underscore', 'pm'],
 function($, _, pm) {    
-    return function(oApp) {
+    return function(oStore) {
         $.pm.unbind("pmSyncGetData");
         $.pm.bind("pmSyncGetData", function (item) {
-            debugger
-            return (oApp.storeDB[item]) ? oApp.storeDB[item] : undefined;            
+            return (oStore[item]) ? oStore[item] : undefined;            
         });    
         
         $.pm.unbind("pmSyncSetData");
         $.pm.bind("pmSyncSetData", function (oObj) {
-            debugger
-            if (oApp.storeDB[oObj.item]) {
-                oApp.storeDB[oObj.item] = oObj.data;
+            if (oStore[oObj.item]) {
+                oStore[oObj.item] = oObj.data;
             }
         });    
+        
+        return {
+            setItemtoChild: function (oParam) {
+                $.pm({
+                        target: $("#ifr").get(0).contentWindow,
+                        type: "pmSyncSetDataToChild",
+                        data: oParam,
+                        success: function(oReturn) {
+                            
+                        }
+                });                     
+            }
+        }
     }   
 });
 

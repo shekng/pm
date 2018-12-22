@@ -50,7 +50,8 @@ require([
 ], 
 function (Mn, Radio, pm, pmSyncParent, UserCollection, AppView, MainView, AboutView, DetailView) {
     var colUser = new UserCollection([{id:0, name:'mike', age:10}, {id:1, name:'tony', age:20}]);
-window.users = colUser;
+    window.users = colUser;
+    
     var AppRouter = Mn.AppRouter.extend({
         routes: {
             "": "home",
@@ -60,8 +61,8 @@ window.users = colUser;
         },
         initialize: function() {
             this.app = this.options.app;
-            this.mainRegion = this.app.getRegion().currentView.getRegion("main");
-        },
+            this.mainRegion = this.app.getRegion().currentView.getRegion("main");                    
+        },        
         home: function() {
             this.mainRegion.show(new MainView({collection: colUser}));
             
@@ -82,7 +83,8 @@ window.users = colUser;
     
     var App = Mn.Application.extend({
         region: "#appRegion",
-        onBeforeStart: function() {
+        onBeforeStart: function() {                        
+            /*
             var channel = Radio.channel("basic");            
             channel.on("some:event", function(oParam){
                 console.log("something happen! - " + oParam.type);
@@ -92,7 +94,12 @@ window.users = colUser;
             
             var channelNotify = Radio.channel("notify");        
             channelNotify.reply("show:error", this.showError);
+            */
         },
+        getApp: function() {
+            return this;  
+        },
+        /*
         showError: function(msg) {
             console.log("showError - " + msg);  
             return "err-101";
@@ -101,36 +108,50 @@ window.users = colUser;
             console.log("showError2 - " + msg);  
             return "err-102";
         },
+        */
+        removeUser: function(oModel) {
+            this.storeDB.users.remove(oModel);
+            this.oSync.setItemtoChild({
+                key: "users", 
+                data: this.storeDB.users
+            });   
+        },
         onStart: function() {
             var me = this;
             
-            this.showView(new AppView());
+            this.storeDB = {
+                p1: {name: "abc"},
+                p2: {name: "def"},
+                users: colUser
+            }
+            
+            var appChannel = Radio.channel("app");
+            appChannel.reply("app:get", this.getApp, this);
+            appChannel.reply("app:users:remove", this.removeUser, this);
+            
+            this.showView(new AppView({collection: colUser}));
             this.router = new AppRouter({"app": this});
             Backbone.history.start();
             
-            var channel = Radio.channel("basic");
-            
+            //var channel = Radio.channel("basic");            
             /*
             this.listenTo(channel, 'some:event', function(oParam){
                 console.log("listen to something happen! - " + oParam.type);
             });
-            */
+            
             var channelNotify = Radio.channel("notify");        
             channelNotify.reply("show:error", this.showError2);
+            */
+                        
             
-            this.storeDB = {
-                item1: "abc"
-            }
-            
-            this.oSync = pmSyncParent(this.storeDB);
-            
+            me.oSync = new pmSyncParent(this.storeDB);
+                    
             setTimeout(function() {
                 me.oSync.setItemtoChild({
-                    item: "item2", 
-                    data: "Oop"
+                    key: "p3", 
+                    data: {name: "333"}
                 });    
-            }, 2000);
-            
+            }, 3000);
         }
     });
     

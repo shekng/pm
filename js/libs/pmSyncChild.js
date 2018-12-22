@@ -1,34 +1,46 @@
 'use strict';
 
-define("pmSyncChild", ['jquery', 'underscore', 'pm'],
-function($, _, pm) {    
-    return function(oStore) {
+define("pmSyncChild", ['jquery', 'underscore', 'backbone.radio', 'pm'],
+function($, _, Radio, pm) {    
+    return function(oStore) {        
+        this.oStore = oStore
+        var thisStore = oStore;    
+        var syncChildChannel = Radio.channel("syncChildChannel");
+        
+        
         $.pm.unbind("pmSyncSetDataToChild");
-        $.pm.bind("pmSyncSetDataToChild", function (oObj) {
-            if (oStore[oObj.item]) {
-                oStore[oObj.item] = oObj.data;
-            }
+        $.pm.bind("pmSyncSetDataToChild", function (oObj) {            
+            //if (oStore[oObj.item]) {      
+            thisStore[oObj.key] = oObj.data;
+            syncChildChannel.trigger("")
+            
         });    
         
-        return {        
-            getItem: function (oParam) {
-                $.pm({
-                        target: window.parent,
-                        type: "pmSyncGetData",
-                        data: oParam.item,
-                        success: $.isFunction(oParam.callBack) ? oParam.callBack : $.noop
-                });                     
-            },
-            setItem: function (oParam) {
-                $.pm({
-                        target: window.parent,
-                        type: "pmSyncSetData",
-                        data: oParam,
-                        success: $.isFunction(oParam.callBack) ? oParam.callBack : $.noop
-                });                     
-            }
-
-
-        }    
-    }
+        this.getItem = function (oParam) {
+            var me = this;
+            
+            $.pm({
+                    target: window.parent,
+                    type: "pmSyncGetData",
+                    data: oParam.key,
+                    success: function(oData) {
+                        me.oStore[oParam.key] = oData;                        
+                        if ($.isFunction(oParam.callBack)) {
+                            oParam.callBack.call(this, oData);
+                        }
+                    }
+            });                     
+        };
+        
+        this.setItem = function (oParam) {
+            var me = this;
+            
+            $.pm({
+                    target: window.parent,
+                    type: "pmSyncSetData",
+                    data: oParam,
+                    success: $.isFunction(oParam.callBack) ? oParam.callBack : $.noop                    
+            });                     
+        }
+    };       
 });

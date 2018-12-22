@@ -39,30 +39,49 @@ require.config({
 
 //Start up our App
 require([
-    'jquery', 'marionette', 'pm', 'pmSyncChild', 'ifrView'
+    'jquery', 'marionette', 'backbone.radio', 'pm', 'pmSyncChild', 'ifrView'
 ], 
-function ($, Mn, pm, pmSyncChild, ifrView) {
+function ($, Mn, Radio, pm, pmSyncChild, ifrView) {
     var App = Mn.Application.extend({
         region: "#appIfr",
         onBeforeStart: function() {
         },
         onStart: function() {
-            this.showView(new ifrView());
+            var me = this;
             
-            this.storeDB = {};
-            this.oSync = pmSyncChild(this.storeDB);
+            var appIfrChannel = Radio.channel("app");
+            appIfrChannel.reply("app:get", this.getApp, this);
             
-            this.oSync.getItem({
-                item: "item1", 
+            me.storeDB = {a: "1"};
+            me.oSync = new pmSyncChild(me.storeDB);
+            
+            me.oSync.getItem({
+                key: "users", 
                 callBack: function(oData) {
+                    //debugger;
+                    me.showView(new ifrView());    
+                }
+            });                                                    
+                        
+            /*
+            me.oSync.getItem({
+                key: "p2", 
+                callBack: function(oData) {
+                    debugger;
+                }
+            });            
+            
+            me.oSync.setItem({
+                key: "p1", 
+                data: {name: "p1p1p1"},
+                callBack: function(oData) {
+                    //debugger;
                 }
             });
-            
-            this.oSync.setItem({
-                item: "item1", 
-                data: "def"
-            });
-            
+            */
+        },
+        getApp: function() {
+            return this;
         }
     });
     

@@ -7,16 +7,18 @@ function($, _, Bb, Mn, Radio, ItemView){
         //collection: new Bb.Collection(),
         childView: ItemView,        
         onRender: function() {
+            this.app = Radio.channel("app");            
             console.log('ul - render');
         },
         onDestroy: function() {
             console.log('ul - destroy');
         },
         onChildviewDeleteItem: function(childView) {
-            var basicChannel = Radio.channel("basic");
-            basicChannel.trigger("some:event", {type: "1"});
-                        
-            this.collection.remove(childView.model);
+            //var basicChannel = Radio.channel("basic");
+            //basicChannel.trigger("some:event", {type: "1"});
+
+            this.app.request("app:users:remove", childView.model);
+            //this.collection.remove(childView.model);
         }
     });
     

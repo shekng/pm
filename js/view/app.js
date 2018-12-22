@@ -10,7 +10,7 @@ function($, _, Mn, HeaderView, MainView) {
             main: "#mainRegion"
         },
         initialize: function() {
-            this.showChildView("header", new HeaderView());
+            this.showChildView("header", new HeaderView({collection: this.collection}));
             //this.showChildView("main", new MainView());
         },
         onRender: function() {

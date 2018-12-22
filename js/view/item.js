@@ -19,11 +19,11 @@ define([
             "click @ui.del": "deleteModel"  
         },
         deleteModel: function() {
-            var basicChannel = Radio.channel("basic");
-            basicChannel.trigger("some:event", {type: "2"});
+            //var basicChannel = Radio.channel("basic");
+            //basicChannel.trigger("some:event", {type: "2"});
                         
-            var channelNotify = Radio.channel("notify");        
-            alert(channelNotify.request("show:error", "this is an error"));
+            //var channelNotify = Radio.channel("notify");        
+            //alert(channelNotify.request("show:error", "this is an error"));
         },
         onRender: function() {
             console.log('li - render (' + this.model.get("name") + ')');                    

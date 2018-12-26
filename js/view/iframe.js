@@ -7,7 +7,7 @@ define([
     'backbone.radio',
     'text!tmpl/iframe.html',
     'collection/users',
-    'view/list'
+    'view/listIfr'
 ], function($, _, Mn, Radio, templateHTML, UserCollection, listView){
     var view = Mn.View.extend({
         template: _.template(templateHTML),
@@ -17,10 +17,10 @@ define([
         onRender: function() {
             console.log('iframe - render');
             
-            var appIfrChannel = Radio.channel("app");
-            this.appIfr = appIfrChannel.request("app:get");
+            var appIfrChannel = Radio.channel("appIfr");
+            this.appIfr = appIfrChannel.request("appIfr:get");
             
-            this.showChildView("users", new listView({collection: new UserCollection(this.appIfr.storeDB.users) }));
+            this.showChildView("users", new listView({collection: this.collection}));
         },
         onDestroy: function() {
             console.log('iframe - destroy');

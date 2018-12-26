@@ -1,7 +1,7 @@
 'use strict';
 
-define(['jquery', 'underscore', 'marionette', 'view/header', 'view/main'],
-function($, _, Mn, HeaderView, MainView) {
+define(['jquery', 'underscore', 'marionette', 'view/header'],
+function($, _, Mn, HeaderView) {
     var view = Mn.View.extend({
         el: "#containerRegion",  
         template: false,

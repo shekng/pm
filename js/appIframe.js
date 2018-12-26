@@ -39,9 +39,9 @@ require.config({
 
 //Start up our App
 require([
-    'jquery', 'marionette', 'backbone.radio', 'pm', 'pmSyncChild', 'ifrView'
+    'jquery', 'marionette', 'backbone.radio', 'pm', 'pmSyncChild', 'collection/users', 'ifrView'
 ], 
-function ($, Mn, Radio, pm, pmSyncChild, ifrView) {
+function ($, Mn, Radio, pm, pmSyncChild, UserCollection, ifrView) {
     var App = Mn.Application.extend({
         region: "#appIfr",
         onBeforeStart: function() {
@@ -49,39 +49,48 @@ function ($, Mn, Radio, pm, pmSyncChild, ifrView) {
         onStart: function() {
             var me = this;
             
-            var appIfrChannel = Radio.channel("app");
-            appIfrChannel.reply("app:get", this.getApp, this);
+            var appIfrChannel = Radio.channel("appIfr");
+            appIfrChannel.reply("appIfr:get", this.getApp, this);
+            appIfrChannel.reply("appIfr:users:remove", this.removeUser, this);
             
             me.storeDB = {a: "1"};
-            me.oSync = new pmSyncChild(me.storeDB);
+            me.oSyncChild = new pmSyncChild(me.storeDB);
+            me.colUserInIfr;
             
-            me.oSync.getItem({
+            me.oSyncChild.getItem({
                 key: "users", 
                 callBack: function(oData) {
-                    //debugger;
-                    me.showView(new ifrView());    
+                    me.colUserInIfr = new UserCollection(oData);
+                    me.showView(new ifrView({collection: me.colUserInIfr}));    
                 }
             });                                                    
                         
             /*
-            me.oSync.getItem({
+            me.oSyncChild.getItem({
                 key: "p2", 
                 callBack: function(oData) {
-                    debugger;
                 }
             });            
             
-            me.oSync.setItem({
+            me.oSyncChild.setItem({
                 key: "p1", 
                 data: {name: "p1p1p1"},
                 callBack: function(oData) {
-                    //debugger;
                 }
             });
             */
         },
         getApp: function() {
             return this;
+        },
+        removeUser: function(oModel) {
+            this.colUserInIfr.remove(oModel);
+            this.storeDB["users"] = this.colUserInIfr.toArray();
+            
+            this.oSyncChild.setItem({
+                key: "users", 
+                data: this.storeDB.users
+            });
         }
     });
     

@@ -9,13 +9,13 @@ function($, _, Bb, Mn, Radio, ItemView){
         initialize: function() {
             var me = this;
             
-            me.syncChildChannel = Radio.channel("syncParentChannel");        
-            me.syncChildChannel.on("syncParent:setData", function(oParam) {
+            me.syncChildChannel = Radio.channel("syncChildChannel");        
+            me.syncChildChannel.on("syncChild:setDataToChild", function(oParam) {
                 me.collection.set(oParam.data);
-            });            
+            });
         },
         onRender: function() {
-            this.app = Radio.channel("app");            
+            this.appIfr = Radio.channel("appIfr");            
             console.log('ul - render');
         },
         onDestroy: function() {
@@ -25,7 +25,7 @@ function($, _, Bb, Mn, Radio, ItemView){
             //var basicChannel = Radio.channel("basic");
             //basicChannel.trigger("some:event", {type: "1"});
 
-            this.app.request("app:users:remove", childView.model);
+            this.appIfr.request("appIfr:users:remove", childView.model);
             //this.collection.remove(childView.model);
         }
     });

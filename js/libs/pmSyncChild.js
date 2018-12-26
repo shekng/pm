@@ -6,14 +6,12 @@ function($, _, Radio, pm) {
         this.oStore = oStore
         var thisStore = oStore;    
         var syncChildChannel = Radio.channel("syncChildChannel");
-        
-        
+                
         $.pm.unbind("pmSyncSetDataToChild");
         $.pm.bind("pmSyncSetDataToChild", function (oObj) {            
             //if (oStore[oObj.item]) {      
             thisStore[oObj.key] = oObj.data;
-            syncChildChannel.trigger("")
-            
+            syncChildChannel.trigger("syncChild:setDataToChild", {key: oObj.key, data: oObj.data});                
         });    
         
         this.getItem = function (oParam) {

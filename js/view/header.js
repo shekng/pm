@@ -18,9 +18,8 @@ define([
 
             var appChannel = Radio.channel("app");            
             this.app = appChannel.request("app:get");
-            
-            debugger
-            this.showChildView("users", new listView({collection: this.app.storeDB.users}));
+                        
+            this.showChildView("users", new listView({collection: this.app.colUser}));
         },
         onDestroy: function() {
             console.log('header - destroy');

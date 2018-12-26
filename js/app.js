@@ -44,114 +44,66 @@ require([
     'pmSyncParent',
     'collection/users',
     'view/app',
-    'view/main',
-    'view/about',
-    'view/detail'
+    'view/main'
 ], 
-function (Mn, Radio, pm, pmSyncParent, UserCollection, AppView, MainView, AboutView, DetailView) {
-    var colUser = new UserCollection([{id:0, name:'mike', age:10}, {id:1, name:'tony', age:20}]);
-    window.users = colUser;
-    
+function (Mn, Radio, pm, pmSyncParent, UserCollection, AppView, MainView) {        
     var AppRouter = Mn.AppRouter.extend({
         routes: {
-            "": "home",
-            "about": "about",
-            "contact": "contact",
-            "user/:id": "detail"
+            "": "home"
         },
         initialize: function() {
             this.app = this.options.app;
             this.mainRegion = this.app.getRegion().currentView.getRegion("main");                    
         },        
         home: function() {
-            this.mainRegion.show(new MainView({collection: colUser}));
-            
-            //console.log("home");
-        },
-        about: function() {
-            this.mainRegion.show(new AboutView({collection: colUser}));
-            
-            //console.log("about");
-        },
-        contact: function() {
-            //console.log("contact");
-        },
-        detail: function(id) {
-            this.mainRegion.show(new DetailView({model: colUser.get(id)}));
-        }
+            this.mainRegion.show(new MainView({collection: this.app.colUser}));        
+        }        
     });
     
     var App = Mn.Application.extend({
         region: "#appRegion",
         onBeforeStart: function() {                        
-            /*
-            var channel = Radio.channel("basic");            
-            channel.on("some:event", function(oParam){
-                console.log("something happen! - " + oParam.type);
-                //channel.off('some:event');
-                return "aaaaaa";
-            })
+        },        
+        onStart: function() {
+            var me = this;
             
-            var channelNotify = Radio.channel("notify");        
-            channelNotify.reply("show:error", this.showError);
-            */
+            me.colUser = new UserCollection([{id:0, name:'mike', age:10}, {id:1, name:'tony', age:20}, {id:2, name:'Cam', age:20}, {id:3, name:'Ethan', age:20}]);
+            
+            // main store
+            me.storeDB = {
+                p1: {name: "abc"},
+                p2: {name: "def"},
+                users: me.colUser.toArray()
+            }
+            
+            me.appChannel = Radio.channel("app");
+            
+            // return app
+            me.appChannel.reply("app:get", this.getApp, this);
+            // remove user
+            me.appChannel.reply("app:users:remove", this.removeUser, this);
+            
+            this.showView(new AppView({collection: me.colUser}));
+            this.router = new AppRouter({"app": this});
+            Backbone.history.start();
+            
+            // create sync parent
+            me.oSyncParent = new pmSyncParent(this.storeDB);       
+            
+            var foo = (x) =>11+x;
+            console.log(foo(10));
         },
         getApp: function() {
             return this;  
         },
-        /*
-        showError: function(msg) {
-            console.log("showError - " + msg);  
-            return "err-101";
-        },
-        showError2: function(msg) {
-            console.log("showError2 - " + msg);  
-            return "err-102";
-        },
-        */
         removeUser: function(oModel) {
-            this.storeDB.users.remove(oModel);
-            this.oSync.setItemtoChild({
+            this.colUser.remove(oModel);
+            this.storeDB["users"] = this.colUser.toArray();
+            
+            this.oSyncParent.setItemtoChild({
                 key: "users", 
                 data: this.storeDB.users
             });   
-        },
-        onStart: function() {
-            var me = this;
-            
-            this.storeDB = {
-                p1: {name: "abc"},
-                p2: {name: "def"},
-                users: colUser
-            }
-            
-            var appChannel = Radio.channel("app");
-            appChannel.reply("app:get", this.getApp, this);
-            appChannel.reply("app:users:remove", this.removeUser, this);
-            
-            this.showView(new AppView({collection: colUser}));
-            this.router = new AppRouter({"app": this});
-            Backbone.history.start();
-            
-            //var channel = Radio.channel("basic");            
-            /*
-            this.listenTo(channel, 'some:event', function(oParam){
-                console.log("listen to something happen! - " + oParam.type);
-            });
-            
-            var channelNotify = Radio.channel("notify");        
-            channelNotify.reply("show:error", this.showError2);
-            */
-                        
-            
-            me.oSync = new pmSyncParent(this.storeDB);
-                    
-            setTimeout(function() {
-                me.oSync.setItemtoChild({
-                    key: "p3", 
-                    data: {name: "333"}
-                });    
-            }, 3000);
         }
     });
     
